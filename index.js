@@ -53,17 +53,24 @@ function readdir(path, ignores, callback) {
         }
 
         if (stats.isDirectory()) {
-          readdir(filePath, ignores, function(__err, res) {
-            if (__err) {
-              return callback(__err)
-            }
-
-            list = list.concat(res)
+          if (p.basename(filePath) === 'node_modules') {
             pending -= 1
             if (!pending) {
               return callback(null, list)
             }
-          })
+          } else {
+            readdir(filePath, ignores, function(__err, res) {
+              if (__err) {
+                return callback(__err)
+              }
+
+              list = list.concat(res)
+              pending -= 1
+              if (!pending) {
+                return callback(null, list)
+              }
+            })
+          }
         } else {
           list.push(filePath)
           pending -= 1
